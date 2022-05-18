@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .checkList {
+        position: absolute;
+        top: 45%;
+        left: 45%;
+      }
+      .checkArea {
+        border: 1px dotted #000;
+        position: absolute;
+        opacity: 0.5;
+        top: 0;
+        left: 0;
+      }
+      body {
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="checkArea"></div>
+    <form class="checkList">
+      <div>
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+      </div>
+      <div>
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+      </div>
+      <div>
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+      </div>
+      <div>
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+      </div>
+      <div>
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+      </div>
+    </form>
+    <script>
+      // 判断一下是否按下鼠标
+      let flag = false;
+
+      let x = 0;
+      let y = 0;
+
+      const inputList = document.querySelectorAll("input");
+      const checkArea = document.querySelector(".checkArea");
+      const html = document.querySelector("html");
+
+      // 用map保存一下checkbox
+      const checkMap = new Map();
+      for (const v of inputList) {
+        checkMap.set(v, {
+          left: v.offsetParent.offsetLeft + v.offsetLeft,
+          right: v.offsetParent.offsetLeft + v.offsetLeft + v.clientWidth,
+          top: v.offsetParent.offsetTop + v.offsetTop,
+          bottom: v.offsetParent.offsetTop + v.offsetTop + v.clientHeight,
+        });
+      }
+
+      document.addEventListener("mousedown", (e) => {
+        flag = true;
+        checkArea.style.top = `${e.pageY}px`;
+        checkArea.style.left = `${e.pageX}px`;
+        x = e.pageX;
+        y = e.pageY;
+        if (e.target == html) {
+          for (const v of inputList) {
+            v.checked = false;
+          }
+        }
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      document.addEventListener("mousemove", (e) => {
+        if (flag) {
+          checkArea.style.width = Math.abs(e.pageX - x) + "px";
+          checkArea.style.height = Math.abs(e.pageY - y) + "px";
+          if (e.pageX < x) {
+            checkArea.style.left = e.pageX + "px";
+          }
+          if (e.pageY < y) {
+            checkArea.style.top = e.pageY + "px";
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          // 计算一下框选区域的bottom和right
+          checkArea.style.bottom =
+            parseInt(checkArea.style.top) +
+            parseInt(checkArea.style.height) +
+            "px";
+          checkArea.style.right =
+            parseInt(checkArea.style.left) +
+            parseInt(checkArea.style.width) +
+            "px";
+          checkSomeBox()
+        }
+      });
+      document.addEventListener("mouseup", (e) => {
+        // 鼠标抬起清除框选
+        checkArea.style.width = 0;
+        checkArea.style.height = 0;
+        checkArea.style.top = 0;
+        checkArea.style.left = 0;
+        checkArea.style.bottom = 0;
+        checkArea.style.right = 0;
+        flag = false;
+        event.preventDefault();
+        event.stopPropagation();
+      });
+
+      // 计算一下checkbox是否在框选中
+      function checkSomeBox () {
+        for (const [k, v] of checkMap.entries()) {
+          const isInLeft =
+            parseInt(checkArea.style.left) <= v.left &&
+            v.left <= parseInt(checkArea.style.right);
+          const isInRight =
+            parseInt(checkArea.style.left) <= v.right &&
+            v.right <= parseInt(checkArea.style.right);
+          const isInTop =
+            parseInt(checkArea.style.top) <= v.top &&
+            v.top <= parseInt(checkArea.style.bottom);
+          const isInBottom =
+            parseInt(checkArea.style.top) <= v.bottom &&
+            v.bottom <= parseInt(checkArea.style.bottom);
+          if ((isInLeft || isInRight) && (isInBottom || isInTop)) {
+            k.checked = true;
+          }
+        }
+      };
+    </script>
+  </body>
+</html>
